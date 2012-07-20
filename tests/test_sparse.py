@@ -39,7 +39,7 @@ def simple_session_app(environ, start_response):
         if not session:
             start_response('200 OK', [('Content-type', 'text/plain')])
             return ["No session id of %s found." % sess_id]
-        if not session.has_key('value'):
+        if 'value' not in session:
             session['value'] = 0
         session['value'] += 1
         if not environ['PATH_INFO'].startswith('/nosave'):
@@ -129,29 +129,29 @@ def test_has_key():
     cache = Cache('test', data_dir='./cache', url=uri, type='mongodb', sparse_collection=True)
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
     assert "test" in cache
-    assert not cache.has_key("foo")
+    assert "test" in cache
+    assert "foo" not in cache
     assert "foo" not in cache
     cache.remove_value("test")
-    assert not cache.has_key("test")
+    assert "test" not in cache
 
 def test_dropping_keys():
     cache = Cache('test', data_dir='./cache', url=uri, type='mongodb', sparse_collection=True)
     cache.set_value('test', 20)
     cache.set_value('fred', 10)
-    assert cache.has_key('test')
     assert 'test' in cache
-    assert cache.has_key('fred')
+    assert 'test' in cache
+    assert 'fred' in cache
 
     # Directly nuke the actual key, to simulate it being removed by mongodb
     cache.namespace.mongo.update({'_id': {'namespace': 'test', 'key': 'test'}}, {'$unset': {'data': True}}, safe=True)
-    assert not cache.has_key('test')
-    assert cache.has_key('fred')
+    assert 'test' not in cache
+    assert 'fred' in cache
 
     # Nuke the keys dict, it might die, who knows
     cache.namespace.mongo.remove({'_id': 'test', 'data.test': {'$exists': True}}, safe=True)
-    assert cache.has_key('fred')
+    assert 'fred' in cache
 
     # And we still need clear to work, even if it won't work well
     cache.clear()
@@ -162,36 +162,36 @@ def test_has_key_multicache():
     cache = Cache('test', data_dir='./cache', url=uri, type='mongodb', sparse_collection=True)
     o = object()
     cache.set_value("test", o)
-    assert cache.has_key("test")
+    assert "test" in cache
     assert "test" in cache
     cache = Cache('test', data_dir='./cache', url=uri, type='mongodb', sparse_collection=True)
-    assert cache.has_key("test")
+    assert "test" in cache
 
 def test_unicode_keys():
     cache = Cache('test', data_dir='./cache', url=uri, type='mongodb', sparse_collection=True)
     o = object()
-    cache.set_value(u'hiŏ', o)
-    assert u'hiŏ' in cache
-    assert u'hŏa' not in cache
-    cache.remove_value(u'hiŏ')
-    assert u'hiŏ' not in cache
+    cache.set_value('hiŏ', o)
+    assert 'hiŏ' in cache
+    assert 'hŏa' not in cache
+    cache.remove_value('hiŏ')
+    assert 'hiŏ' not in cache
 
 def test_spaces_in_unicode_keys():
     cache = Cache('test', data_dir='./cache', url=uri, type='mongodb', sparse_collection=True)
     o = object()
-    cache.set_value(u'hi ŏ', o)
-    assert u'hi ŏ' in cache
-    assert u'hŏa' not in cache
-    cache.remove_value(u'hi ŏ')
-    assert u'hi ŏ' not in cache
+    cache.set_value('hi ŏ', o)
+    assert 'hi ŏ' in cache
+    assert 'hŏa' not in cache
+    cache.remove_value('hi ŏ')
+    assert 'hi ŏ' not in cache
 
 def test_spaces_in_keys():
     cache = Cache('test', data_dir='./cache', url=uri, type='mongodb', sparse_collection=True)
     cache.set_value("has space", 24)
-    assert cache.has_key("has space")
+    assert "has space" in cache
     assert 24 == cache.get_value("has space")
     cache.set_value("hasspace", 42)
-    assert cache.has_key("hasspace")
+    assert "hasspace" in cache
     assert 42 == cache.get_value("hasspace")
 
 def test_increment():
@@ -235,9 +235,9 @@ class TestMongoInit(unittest.TestCase):
         cache = Cache('test', data_dir='./cache', url=uri, type="mongodb", sparse_collection=True)
         o = object()
         cache.set_value("test", o)
-        assert cache.has_key("test")
         assert "test" in cache
-        assert not cache.has_key("foo")
+        assert "test" in cache
+        assert "foo" not in cache
         assert "foo" not in cache
         cache.remove_value("test")
-        assert not cache.has_key("test")
+        assert "test" not in cache
