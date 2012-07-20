@@ -12,7 +12,7 @@ except ImportError:
 
 setup(
     name = 'mongodb_beaker',
-    version = '0.5',
+    version = '0.5-znanja1',
     description = 'Beaker backend to write sessions and caches to a ' +\
     'MongoDB schemaless database.',
     long_description = '\n' + open('README.rst').read(),
